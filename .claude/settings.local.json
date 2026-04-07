@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir /Users/juliapiresdossantos/projects/world_pin/docs)",
+      "Bash(mv /Users/juliapiresdossantos/projects/world_pin/ARCHITECTURE.md /Users/juliapiresdossantos/projects/world_pin/docs/)",
+      "Bash(mv /Users/juliapiresdossantos/projects/world_pin/README.md /Users/juliapiresdossantos/projects/world_pin/docs/)",
+      "Bash(flutter pub:*)",
+      "Bash(fvm flutter:*)",
+      "WebSearch"
+    ]
+  }
+}
