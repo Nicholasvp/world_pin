@@ -1,8 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import '../repositories/auth_repository.dart';
 
-// Estado da autenticação
 sealed class AuthState {
   const AuthState();
 }
@@ -29,7 +28,6 @@ class AuthError extends AuthState {
   const AuthError(this.message);
 }
 
-// Controller
 class AuthController extends Notifier<AuthState> {
   late final AuthRepository _repository;
 
@@ -37,7 +35,6 @@ class AuthController extends Notifier<AuthState> {
   AuthState build() {
     _repository = AuthRepository();
 
-    // Escuta mudanças de sessão em tempo real
     _repository.authStateChanges.listen((event) {
       final user = event.session?.user;
       state = user != null
@@ -61,10 +58,18 @@ class AuthController extends Notifier<AuthState> {
     }
   }
 
-  Future<void> signUp({required String email, required String password}) async {
+  Future<void> signUp({
+    required String email,
+    required String password,
+    required String name,
+  }) async {
     state = const AuthLoading();
     try {
-      final user = await _repository.signUp(email: email, password: password);
+      final user = await _repository.signUp(
+        email: email,
+        password: password,
+        name: name,
+      );
       state = AuthAuthenticated(user);
     } on AuthException catch (e) {
       state = AuthError(e.message);

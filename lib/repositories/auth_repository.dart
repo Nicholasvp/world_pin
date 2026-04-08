@@ -13,12 +13,22 @@ class AuthRepository {
   Future<User> signUp({
     required String email,
     required String password,
+    required String name,
   }) async {
     final response = await _client.auth.signUp(
       email: email,
       password: password,
     );
     if (response.user == null) throw Exception('Falha ao criar conta');
+
+    await _client.from('users').insert({
+      'id': response.user!.id,
+      'email': email,
+      'name': name,
+      'countries_visited': [],
+      'countries_wish': [],
+    });
+
     return response.user!;
   }
 

@@ -2,28 +2,111 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:sealed_countries/sealed_countries.dart' hide LatLng;
+import '../controllers/auth_controller.dart';
 import '../controllers/user_controller.dart';
 import '../models/country_model.dart';
+import '../providers/visited_countries_provider.dart';
 import '../providers/world_polygons_provider.dart';
 import 'country_search_delegate.dart';
 
-class MapView extends ConsumerWidget {
+class MapView extends ConsumerStatefulWidget {
   const MapView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(userProvider);
-    final visitedCountries = user?.visitedCountries ?? [];
+  ConsumerState<MapView> createState() => _MapViewState();
+}
 
+class _MapViewState extends ConsumerState<MapView>
+    with TickerProviderStateMixin {
+  late final MapController _mapController;
+
+  @override
+  void initState() {
+    super.initState();
+    _mapController = MapController();
+  }
+
+  @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
+  }
+
+  void _animateTo(LatLng destination, {double zoom = 5}) {
+    final camera = _mapController.camera;
+    final latTween =
+        Tween<double>(begin: camera.center.latitude, end: destination.latitude);
+    final lngTween = Tween<double>(
+        begin: camera.center.longitude, end: destination.longitude);
+    final zoomTween = Tween<double>(begin: camera.zoom, end: zoom);
+
+    final controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    final animation =
+        CurvedAnimation(parent: controller, curve: Curves.easeInOut);
+
+    controller.addListener(() {
+      _mapController.move(
+        LatLng(latTween.evaluate(animation), lngTween.evaluate(animation)),
+        zoomTween.evaluate(animation),
+      );
+    });
+
+    controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed ||
+          status == AnimationStatus.dismissed) {
+        controller.dispose();
+      }
+    });
+
+    controller.forward();
+  }
+
+  double _zoomForCountry(WorldCountry country) {
+    final area = country.areaMetric;
+    if (area >= 3_000_000) return 3.0;
+    if (area >= 1_000_000) return 4.0;
+    if (area >= 200_000) return 5.0;
+    if (area >= 50_000) return 6.0;
+    if (area >= 10_000) return 7.0;
+    return 8.0;
+  }
+
+  Marker _buildMarkerFromIso(String isoCode) {
+    final country = WorldCountry.fromCodeShort(isoCode);
+    return Marker(
+      point: LatLng(country.latLng.latitude, country.latLng.longitude),
+      width: 40,
+      height: 40,
+      child: Tooltip(
+        message: country.internationalName,
+        child: const Icon(Icons.location_pin, color: Colors.red, size: 36),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final visitedAsync = ref.watch(visitedCountriesProvider);
     final worldPolygonsAsync = ref.watch(worldPolygonsProvider);
-    final visitedIsoCodes = visitedCountries.map((c) => c.isoCode).toList();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('World Pin'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sair',
+            onPressed: () => ref.read(authProvider.notifier).signOut(),
+          ),
+        ],
       ),
       body: FlutterMap(
+        mapController: _mapController,
         options: const MapOptions(
           initialCenter: LatLng(20, 0),
           initialZoom: 2,
@@ -35,53 +118,36 @@ class MapView extends ConsumerWidget {
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.example.world_pin',
           ),
-          if (visitedCountries.isNotEmpty)
-            worldPolygonsAsync.when(
-              data: (worldData) => PolygonLayer(
-                polygons: buildVisitedPolygons(worldData, visitedIsoCodes),
+          if (visitedAsync.hasValue && worldPolygonsAsync.hasValue)
+            PolygonLayer(
+              polygons: buildVisitedPolygons(
+                worldPolygonsAsync.value!,
+                visitedAsync.value!,
               ),
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
             ),
-          if (visitedCountries.isNotEmpty)
+          if (visitedAsync.hasValue && visitedAsync.value!.isNotEmpty)
             MarkerLayer(
-              markers: visitedCountries
-                  .map((country) => _buildMarker(context, country))
+              markers: visitedAsync.value!
+                  .map(_buildMarkerFromIso)
                   .toList(),
             ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _searchAndAddCountry(context, ref),
-        tooltip: 'Add visited country',
+        onPressed: _searchAndAddCountry,
+        tooltip: 'Adicionar país visitado',
         child: const Icon(Icons.add_location_alt),
       ),
     );
   }
 
-  Marker _buildMarker(BuildContext context, CountryModel country) {
-    final parts = country.localization.split(',');
-    final lat = double.tryParse(parts[0].trim()) ?? 0;
-    final lng = double.tryParse(parts.length > 1 ? parts[1].trim() : '0') ?? 0;
-
-    return Marker(
-      point: LatLng(lat, lng),
-      width: 40,
-      height: 40,
-      child: Tooltip(
-        message: '${country.name}\n${country.date.day}/${country.date.month}/${country.date.year}',
-        child: const Icon(Icons.location_pin, color: Colors.red, size: 36),
-      ),
-    );
-  }
-
-  Future<void> _searchAndAddCountry(BuildContext context, WidgetRef ref) async {
+  Future<void> _searchAndAddCountry() async {
     final country = await showSearch(
       context: context,
       delegate: CountrySearchDelegate(),
     );
 
-    if (country == null || !context.mounted) return;
+    if (country == null || !mounted) return;
 
     final date = await showDatePicker(
       context: context,
@@ -92,14 +158,19 @@ class MapView extends ConsumerWidget {
 
     if (date == null) return;
 
-    ref.read(userProvider.notifier).addVisitedCountry(
+    await ref.read(userProvider.notifier).addVisitedCountry(
           CountryModel(
             name: country.internationalName,
-            isoCode: country.code,
+            isoCode: country.codeShort,
             localization:
                 '${country.latLng.latitude}, ${country.latLng.longitude}',
             date: date,
           ),
         );
+
+    _animateTo(
+      LatLng(country.latLng.latitude, country.latLng.longitude),
+      zoom: _zoomForCountry(country),
+    );
   }
 }

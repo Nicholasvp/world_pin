@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/country_model.dart';
 import '../models/user_model.dart';
+import '../providers/visited_countries_provider.dart';
 
 class UserController extends Notifier<UserModel?> {
   @override
@@ -10,20 +11,14 @@ class UserController extends Notifier<UserModel?> {
     state = user;
   }
 
-  void addVisitedCountry(CountryModel country) {
+  Future<void> addVisitedCountry(CountryModel country) async {
     if (state == null) return;
-    state = state!.copyWith(
-      visitedCountries: [...state!.visitedCountries, country],
-    );
+    await ref.read(visitedCountriesProvider.notifier).add(country.isoCode);
   }
 
-  void removeVisitedCountry(String countryName) {
+  Future<void> removeVisitedCountry(String isoCode) async {
     if (state == null) return;
-    state = state!.copyWith(
-      visitedCountries: state!.visitedCountries
-          .where((c) => c.name != countryName)
-          .toList(),
-    );
+    await ref.read(visitedCountriesProvider.notifier).remove(isoCode);
   }
 
   void clearUser() {
