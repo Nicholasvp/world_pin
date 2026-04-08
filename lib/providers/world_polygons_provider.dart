@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
 // Raw polygon shapes (points + holes) keyed by ISO Alpha-3 code.
@@ -12,13 +12,9 @@ typedef PolygonShape = ({List<LatLng> points, List<List<LatLng>>? holes});
 
 final worldPolygonsProvider =
     FutureProvider<Map<String, List<PolygonShape>>>((ref) async {
-  const url =
-      'https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json';
+  final body = await rootBundle.loadString('assets/countries.geo.json');
 
-  final response = await http.get(Uri.parse(url));
-  if (response.statusCode != 200) return {};
-
-  final decoded = json.decode(response.body) as Map<String, dynamic>;
+  final decoded = json.decode(body) as Map<String, dynamic>;
   final features = decoded['features'] as List<dynamic>;
 
   final result = <String, List<PolygonShape>>{};
