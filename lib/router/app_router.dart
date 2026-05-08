@@ -4,6 +4,7 @@ import '../controllers/auth_controller.dart';
 import '../views/login_view.dart';
 import '../views/map_view.dart';
 import '../views/register_view.dart';
+import '../views/countries_list_view.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -34,6 +35,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/register',
         name: 'register',
         builder: (context, state) => const RegisterView(),
+      ),
+      GoRoute(
+        path: '/list',
+        name: 'list',
+        builder: (context, state) => const CountriesListView(),
       ),
     ],
   );

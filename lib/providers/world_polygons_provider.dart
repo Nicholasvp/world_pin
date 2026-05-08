@@ -1,17 +1,18 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:sealed_countries/sealed_countries.dart' show WorldCountry;
 
 // Raw polygon shapes (points + holes) keyed by ISO Alpha-3 code.
 // Colors are applied later so the same data can be reused with different styles.
 typedef PolygonShape = ({List<LatLng> points, List<List<LatLng>>? holes});
 
-final worldPolygonsProvider =
-    FutureProvider<Map<String, List<PolygonShape>>>((ref) async {
+final worldPolygonsProvider = FutureProvider<Map<String, List<PolygonShape>>>((
+  ref,
+) async {
   final body = await rootBundle.loadString('assets/countries.geo.json');
 
   final decoded = json.decode(body) as Map<String, dynamic>;
@@ -65,33 +66,33 @@ PolygonShape? _parsePolygon(List<dynamic> rings) {
 }
 
 List<LatLng> _parseRing(List<dynamic> coords) => coords.map((p) {
-      final point = p as List<dynamic>;
-      return LatLng(
-        (point[1] as num).toDouble(),
-        (point[0] as num).toDouble(),
-      );
-    }).toList();
+  final point = p as List<dynamic>;
+  return LatLng((point[1] as num).toDouble(), (point[0] as num).toDouble());
+}).toList();
 
-// Builds the list of colored Polygon widgets for a set of visited ISO codes.
-List<Polygon> buildVisitedPolygons(
-  Map<String, List<PolygonShape>> worldData,
-  List<String> isoCodes,
-) {
-  const fillColor = Color(0x556750A4);
-  const borderColor = Color(0xFF6750A4);
-
+// Builds the list of colored Polygon widgets for a set of ISO codes.
+List<Polygon> buildCountryPolygons({
+  required Map<String, List<PolygonShape>> worldData,
+  required List<String> isoCodes,
+  required Color fillColor,
+  required Color borderColor,
+}) {
   final polygons = <Polygon>[];
   for (final code in isoCodes) {
-    final shapes = worldData[code];
+    // Convert to Alpha-3 if it's an old Alpha-2 code
+    final alpha3Code = WorldCountry.maybeFromAnyCode(code)?.code ?? code;
+    final shapes = worldData[alpha3Code];
     if (shapes == null) continue;
     for (final shape in shapes) {
-      polygons.add(Polygon(
-        points: shape.points,
-        holePointsList: shape.holes,
-        color: fillColor,
-        borderColor: borderColor,
-        borderStrokeWidth: 1.5,
-      ));
+      polygons.add(
+        Polygon(
+          points: shape.points,
+          holePointsList: shape.holes,
+          color: fillColor,
+          borderColor: borderColor,
+          borderStrokeWidth: 1.5,
+        ),
+      );
     }
   }
   return polygons;

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:world_pin/l10n/app_localizations.dart';
 import 'router/app_router.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,10 +28,16 @@ class MyApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
     return MaterialApp.router(
       title: 'World Pin',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
       routerConfig: router,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('en'), Locale('pt')],
     );
   }
 }

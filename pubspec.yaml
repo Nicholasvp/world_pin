@@ -10,6 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
 
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.6.1
@@ -21,6 +24,8 @@ dependencies:
   http: ^1.2.2
   supabase_flutter: ^2.9.1
   flutter_dotenv: ^5.2.1
+  google_fonts: ^6.2.1
+  flutter_speed_dial: ^7.0.0
 
 dev_dependencies:
   flutter_test:
@@ -29,9 +34,26 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   build_runner: ^2.4.13
   riverpod_generator: ^2.6.1
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.1
+
 
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     - .env
     - assets/countries.geo.json
+    - assets/logo.png
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo.png"
+  min_sdk_android: 21
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/logo.png
+  android_12:
+    image: assets/logo.png

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:world_pin/l10n/app_localizations.dart';
 import '../controllers/auth_controller.dart';
 
 class RegisterView extends ConsumerStatefulWidget {
@@ -30,7 +31,9 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    await ref.read(authProvider.notifier).signUp(
+    await ref
+        .read(authProvider.notifier)
+        .signUp(
           name: _nameController.text.trim(),
           email: _emailController.text.trim(),
           password: _passwordController.text,
@@ -41,6 +44,7 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final isLoading = authState is AuthLoading;
+    final l10n = AppLocalizations.of(context)!;
 
     ref.listen(authProvider, (_, next) {
       if (next is AuthError) {
@@ -71,14 +75,24 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 24),
+                  Image.asset('assets/logo.png', height: 80),
+                  const SizedBox(height: 24),
+                  Text(
+                    l10n.createAccount,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
                   TextFormField(
                     controller: _nameController,
                     keyboardType: TextInputType.name,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'Nome',
-                      prefixIcon: Icon(Icons.person_outline),
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.name,
+                      prefixIcon: const Icon(Icons.person_outline),
                     ),
                     validator: (v) {
                       if (v == null || v.isEmpty) return 'Informe o nome';
@@ -90,10 +104,9 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'E-mail',
-                      prefixIcon: Icon(Icons.email_outlined),
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.email,
+                      prefixIcon: const Icon(Icons.email_outlined),
                     ),
                     validator: (v) {
                       if (v == null || v.isEmpty) return 'Informe o e-mail';
@@ -107,15 +120,17 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                     obscureText: _obscurePassword,
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
-                      labelText: 'Senha',
+                      labelText: l10n.password,
                       prefixIcon: const Icon(Icons.lock_outline),
-                      border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
-                        icon: Icon(_obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility),
-                        onPressed: () =>
-                            setState(() => _obscurePassword = !_obscurePassword),
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
                     ),
                     validator: (v) {
@@ -131,13 +146,14 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _submit(),
                     decoration: InputDecoration(
-                      labelText: 'Confirmar senha',
+                      labelText: l10n.confirmPassword,
                       prefixIcon: const Icon(Icons.lock_outline),
-                      border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
-                        icon: Icon(_obscureConfirm
-                            ? Icons.visibility_off
-                            : Icons.visibility),
+                        icon: Icon(
+                          _obscureConfirm
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
                         onPressed: () =>
                             setState(() => _obscureConfirm = !_obscureConfirm),
                       ),
@@ -150,26 +166,31 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 24),
-                  FilledButton(
+                  const SizedBox(height: 32),
+                  ElevatedButton(
                     onPressed: isLoading ? null : _submit,
                     child: isLoading
                         ? const SizedBox(
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white),
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
                           )
-                        : const Text('Criar conta'),
+                        : Text(l10n.createAccount),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Já tem conta?'),
+                      Text(l10n.alreadyHaveAccount),
                       TextButton(
                         onPressed: () => context.pop(),
-                        child: const Text('Entrar'),
+                        child: Text(
+                          l10n.login,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ],
                   ),

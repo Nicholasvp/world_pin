@@ -1,10 +1,12 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:sealed_countries/sealed_countries.dart';
 
 class VisitedCountriesRepository {
   final SupabaseClient _client;
 
   static const _table = 'users';
-  static const _column = 'countries_visited';
+  static const _visitedColumn = 'countries_visited';
+  static const _wishColumn = 'countries_wish';
 
   VisitedCountriesRepository({SupabaseClient? client})
       : _client = client ?? Supabase.instance.client;
@@ -15,7 +17,6 @@ class VisitedCountriesRepository {
     return id;
   }
 
-  /// Garante que o registro do usuário existe na tabela.
   Future<void> _ensureUserExists() async {
     final exists = await _client
         .from(_table)
@@ -35,56 +36,52 @@ class VisitedCountriesRepository {
     });
   }
 
-  /// Retorna a lista de países visitados do usuário autenticado.
-  Future<List<String>> getAll() async {
+  /// Retorna a lista de países de uma coluna específica.
+  Future<List<String>> _get(String column) async {
     final data = await _client
         .from(_table)
-        .select(_column)
+        .select(column)
         .eq('id', _userId)
         .maybeSingle();
 
-    final list = data?[_column] as List?;
+    final list = data?[column] as List?;
     return list?.cast<String>() ?? [];
   }
 
-  /// Adiciona um país à lista (sem duplicatas).
-  Future<List<String>> add(String isoCode) async {
+  Future<List<String>> getVisited() => _get(_visitedColumn);
+  Future<List<String>> getWishlist() => _get(_wishColumn);
+
+  /// Adiciona um país a uma lista específica.
+  Future<List<String>> _add(String column, String isoCode) async {
     await _ensureUserExists();
 
-    final current = await getAll();
+    final current = await _get(column);
     if (current.contains(isoCode)) return current;
 
     final updated = [...current, isoCode];
-    await _client
-        .from(_table)
-        .update({_column: updated})
-        .eq('id', _userId);
+    await _client.from(_table).update({column: updated}).eq('id', _userId);
 
     return updated;
   }
 
-  /// Remove um país da lista.
-  Future<List<String>> remove(String isoCode) async {
+  Future<List<String>> addVisited(String isoCode) => _add(_visitedColumn, isoCode);
+  Future<List<String>> addWishlist(String isoCode) => _add(_wishColumn, isoCode);
+
+  /// Remove um país de uma lista específica.
+  Future<List<String>> _remove(String column, String isoCode) async {
     await _ensureUserExists();
 
-    final current = await getAll();
-    final updated = current.where((c) => c != isoCode).toList();
+    final current = await _get(column);
+    final updated = current.where((c) {
+      final country = WorldCountry.maybeFromAnyCode(c);
+      return country?.code != isoCode && c != isoCode;
+    }).toList();
 
-    await _client
-        .from(_table)
-        .update({_column: updated})
-        .eq('id', _userId);
+    await _client.from(_table).update({column: updated}).eq('id', _userId);
 
     return updated;
   }
 
-  /// Substitui toda a lista de países visitados.
-  Future<void> setAll(List<String> isoCodes) async {
-    await _ensureUserExists();
-
-    await _client
-        .from(_table)
-        .update({_column: isoCodes})
-        .eq('id', _userId);
-  }
+  Future<List<String>> removeVisited(String isoCode) => _remove(_visitedColumn, isoCode);
+  Future<List<String>> removeWishlist(String isoCode) => _remove(_wishColumn, isoCode);
 }

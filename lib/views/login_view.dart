@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:world_pin/l10n/app_localizations.dart';
 import '../controllers/auth_controller.dart';
 
 class LoginView extends ConsumerStatefulWidget {
@@ -25,7 +26,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    await ref.read(authProvider.notifier).signIn(
+    await ref
+        .read(authProvider.notifier)
+        .signIn(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
@@ -35,6 +38,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final isLoading = authState is AuthLoading;
+    final l10n = AppLocalizations.of(context)!;
 
     ref.listen(authProvider, (_, next) {
       if (next is AuthError) {
@@ -54,25 +58,34 @@ class _LoginViewState extends ConsumerState<LoginView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(Icons.public, size: 72, color: Colors.deepPurple),
-                  const SizedBox(height: 16),
+                  Image.asset('assets/logo.png', height: 120),
+                  const SizedBox(height: 32),
                   Text(
-                    'World Pin',
+                    l10n.appTitle,
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple,
-                        ),
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.tagline,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onBackground.withOpacity(0.7),
+                    ),
                   ),
                   const SizedBox(height: 48),
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'E-mail',
-                      prefixIcon: Icon(Icons.email_outlined),
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.email,
+                      prefixIcon: const Icon(Icons.email_outlined),
                     ),
                     validator: (v) {
                       if (v == null || v.isEmpty) return 'Informe o e-mail';
@@ -87,15 +100,17 @@ class _LoginViewState extends ConsumerState<LoginView> {
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _submit(),
                     decoration: InputDecoration(
-                      labelText: 'Senha',
+                      labelText: l10n.password,
                       prefixIcon: const Icon(Icons.lock_outline),
-                      border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
-                        icon: Icon(_obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility),
-                        onPressed: () =>
-                            setState(() => _obscurePassword = !_obscurePassword),
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
                     ),
                     validator: (v) {
@@ -109,29 +124,34 @@ class _LoginViewState extends ConsumerState<LoginView> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () => _showResetPasswordDialog(context),
-                      child: const Text('Esqueci a senha'),
+                      child: Text(l10n.forgotPassword),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  FilledButton(
+                  const SizedBox(height: 24),
+                  ElevatedButton(
                     onPressed: isLoading ? null : _submit,
                     child: isLoading
                         ? const SizedBox(
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white),
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
                           )
-                        : const Text('Entrar'),
+                        : Text(l10n.enter),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Não tem conta?'),
+                      Text(l10n.noAccount),
                       TextButton(
                         onPressed: () => context.push('/register'),
-                        child: const Text('Criar conta'),
+                        child: Text(
+                          l10n.createAccount,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ],
                   ),
