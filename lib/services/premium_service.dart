@@ -1,0 +1,78 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
+
+class PremiumService {
+  static const String _entitlementId = 'Nicholas Pinheiro Pro';
+
+  /// Initializes the RevenueCat SDK
+  static Future<void> initialize() async {
+    await Purchases.setLogLevel(kDebugMode ? LogLevel.debug : LogLevel.error);
+
+    String? apiKey = dotenv.env['REVENUECAT_API_KEY'];
+
+    if (apiKey == null || apiKey.isEmpty) {
+      debugPrint('RevenueCat API Key is missing');
+      return;
+    }
+
+    PurchasesConfiguration configuration = PurchasesConfiguration(apiKey);
+    await Purchases.configure(configuration);
+  }
+
+  /// Checks if the user has the 'Nicholas Pinheiro Pro' entitlement
+  static Future<bool> isPremium() async {
+    try {
+      CustomerInfo customerInfo = await Purchases.getCustomerInfo();
+      return customerInfo.entitlements.all[_entitlementId]?.isActive ?? false;
+    } catch (e) {
+      debugPrint('Error checking premium status: $e');
+      return false;
+    }
+  }
+
+  /// Displays the RevenueCat Paywall
+  static Future<void> showPaywall() async {
+    try {
+      final paywallResult = await RevenueCatUI.presentPaywallIfNeeded(
+        _entitlementId,
+        displayCloseButton: true,
+      );
+      debugPrint('Paywall result: $paywallResult');
+    } catch (e) {
+      debugPrint('Error showing paywall: $e');
+    }
+  }
+
+  /// Displays the Customer Center
+  static Future<void> showCustomerCenter() async {
+    try {
+      await RevenueCatUI.presentCustomerCenter();
+    } catch (e) {
+      debugPrint('Error showing customer center: $e');
+    }
+  }
+
+  /// Restores previous purchases
+  static Future<bool> restorePurchases() async {
+    try {
+      CustomerInfo customerInfo = await Purchases.restorePurchases();
+      return customerInfo.entitlements.all[_entitlementId]?.isActive ?? false;
+    } catch (e) {
+      debugPrint('Error restoring purchases: $e');
+      return false;
+    }
+  }
+
+  /// Fetches available offerings
+  static Future<Offerings?> getOfferings() async {
+    try {
+      return await Purchases.getOfferings();
+    } catch (e) {
+      debugPrint('Error fetching offerings: $e');
+      return null;
+    }
+  }
+}

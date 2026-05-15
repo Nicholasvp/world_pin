@@ -11,6 +11,9 @@ import '../providers/visited_countries_provider.dart';
 import '../providers/wishlist_countries_provider.dart';
 import '../providers/world_polygons_provider.dart';
 import 'country_search_delegate.dart';
+import '../providers/premium_provider.dart';
+import '../services/premium_service.dart';
+import '../widgets/month_year_picker.dart';
 
 class MapView extends ConsumerStatefulWidget {
   const MapView({super.key});
@@ -121,11 +124,26 @@ class _MapViewState extends ConsumerState<MapView>
     final wishlistAsync = ref.watch(wishlistCountriesProvider);
     final worldPolygonsAsync = ref.watch(worldPolygonsProvider);
     final l10n = AppLocalizations.of(context)!;
+    final isPremium = ref.watch(premiumProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appTitle.toUpperCase()),
         actions: [
+          IconButton(
+            icon: Icon(
+              isPremium ? Icons.verified_user_rounded : Icons.star_rounded,
+              color: isPremium ? Colors.green : Colors.amber,
+            ),
+            tooltip: isPremium ? 'Premium Active' : 'Go Premium',
+            onPressed: () {
+              if (isPremium) {
+                PremiumService.showCustomerCenter();
+              } else {
+                ref.read(premiumProvider.notifier).purchaseFullAccess();
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.list_alt_rounded),
             tooltip: l10n.myTrips,
@@ -266,7 +284,10 @@ class _MapViewState extends ConsumerState<MapView>
                       ),
                       onPressed: () => Navigator.pop(context, 'visited'),
                       icon: const Icon(Icons.check_circle_outline),
-                      label: Text(l10n.alreadyVisited),
+                      label: Text(
+                        l10n.alreadyVisited,
+                        style: TextStyle(fontSize: 12),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -277,7 +298,10 @@ class _MapViewState extends ConsumerState<MapView>
                       ),
                       onPressed: () => Navigator.pop(context, 'wish'),
                       icon: const Icon(Icons.star_outline),
-                      label: Text(l10n.wantToGo),
+                      label: Text(
+                        l10n.wantToGo,
+                        style: TextStyle(fontSize: 12),
+                      ),
                     ),
                   ),
                 ],
@@ -292,7 +316,7 @@ class _MapViewState extends ConsumerState<MapView>
     if (choice == null || !mounted) return;
 
     if (choice == 'visited') {
-      final date = await showDatePicker(
+      final date = await MonthYearPicker.show(
         context: context,
         initialDate: DateTime.now(),
         firstDate: DateTime(1900),
