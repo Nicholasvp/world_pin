@@ -3,12 +3,40 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:world_pin/controllers/user_controller.dart';
 import 'package:world_pin/models/country_model.dart';
 import 'package:world_pin/models/user_model.dart';
+import 'package:world_pin/providers/config_provider.dart';
+import 'package:world_pin/providers/premium_provider.dart';
+import 'package:world_pin/providers/visited_countries_provider.dart';
+
+class FakeVisitedCountriesNotifier extends VisitedCountriesNotifier {
+  @override
+  Future<List<String>> build() async => [];
+
+  @override
+  Future<void> add(String isoCode) async {
+    state = AsyncData([...state.value ?? [], isoCode]);
+  }
+}
+
+class FakePremiumNotifier extends PremiumNotifier {
+  FakePremiumNotifier() : super();
+
+  @override
+  Future<void> _init() async {
+    state = false;
+  }
+}
 
 void main() {
   late ProviderContainer container;
 
   setUp(() {
-    container = ProviderContainer();
+    container = ProviderContainer(
+      overrides: [
+        configLimitProvider.overrideWith((ref) => Future.value(5)),
+        premiumProvider.overrideWith((ref) => FakePremiumNotifier()),
+        visitedCountriesProvider.overrideWith(() => FakeVisitedCountriesNotifier()),
+      ],
+    );
   });
 
   tearDown(() {

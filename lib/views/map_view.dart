@@ -13,8 +13,10 @@ import '../providers/wishlist_countries_provider.dart';
 import '../providers/world_polygons_provider.dart';
 import 'country_search_delegate.dart';
 import '../providers/premium_provider.dart';
+import '../providers/config_provider.dart';
 import '../services/premium_service.dart';
 import '../widgets/month_year_picker.dart';
+
 
 class MapView extends ConsumerStatefulWidget {
   const MapView({super.key});
@@ -321,7 +323,19 @@ class _MapViewState extends ConsumerState<MapView>
 
     if (choice == null || !mounted) return;
 
+    final isPremium = ref.read(premiumProvider);
+
     if (choice == 'visited') {
+      if (!isPremium) {
+        final limit = await ref.read(configLimitProvider.future);
+        if (visitedCodes.length >= limit) {
+          if (mounted) {
+            await ref.read(premiumProvider.notifier).purchaseFullAccess();
+          }
+          return;
+        }
+      }
+
       final date = await MonthYearPicker.show(
         context: context,
         initialDate: DateTime.now(),
@@ -333,6 +347,16 @@ class _MapViewState extends ConsumerState<MapView>
 
       await ref.read(visitedCountriesProvider.notifier).add(country.code);
     } else {
+      if (!isPremium) {
+        final limit = await ref.read(configLimitProvider.future);
+        if (wishlistCodes.length >= limit) {
+          if (mounted) {
+            await ref.read(premiumProvider.notifier).purchaseFullAccess();
+          }
+          return;
+        }
+      }
+
       await ref.read(wishlistCountriesProvider.notifier).add(country.code);
     }
 

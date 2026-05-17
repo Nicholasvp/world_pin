@@ -13,11 +13,17 @@ class UserController extends Notifier<UserModel?> {
 
   Future<void> addVisitedCountry(CountryModel country) async {
     if (state == null) return;
+    state = state!.copyWith(
+      visitedCountries: [...state!.visitedCountries, country],
+    );
     await ref.read(visitedCountriesProvider.notifier).add(country.isoCode);
   }
 
   Future<void> removeVisitedCountry(String isoCode) async {
     if (state == null) return;
+    state = state!.copyWith(
+      visitedCountries: state!.visitedCountries.where((c) => c.isoCode != isoCode).toList(),
+    );
     await ref.read(visitedCountriesProvider.notifier).remove(isoCode);
   }
 

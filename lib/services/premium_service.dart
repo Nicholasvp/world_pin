@@ -12,17 +12,20 @@ class PremiumService {
     await Purchases.setLogLevel(kDebugMode ? LogLevel.debug : LogLevel.error);
 
     String? apiKey;
-    if (Platform.isIOS) {
-      apiKey = dotenv.env['REVENUECAT_IOS_API_KEY'];
-    } else if (Platform.isAndroid) {
-      apiKey = dotenv.env['REVENUECAT_ANDROID_API_KEY'];
+    final iosKey = dotenv.env['REVENUECAT_IOS_API_KEY'];
+    final androidKey = dotenv.env['REVENUECAT_ANDROID_API_KEY'];
+
+    if (Platform.isIOS && iosKey != null && !iosKey.contains('your_actual')) {
+      apiKey = iosKey;
+    } else if (Platform.isAndroid && androidKey != null && !androidKey.contains('your_actual')) {
+      apiKey = androidKey;
     }
 
-    // Fallback if platform-specific keys are not set but the generic one is
+    // Fallback if platform-specific keys are not set or are placeholders
     apiKey ??= dotenv.env['REVENUECAT_API_KEY'];
 
-    if (apiKey == null || apiKey.isEmpty) {
-      debugPrint('RevenueCat API Key is missing for this platform');
+    if (apiKey == null || apiKey.isEmpty || apiKey.contains('your_actual')) {
+      debugPrint('RevenueCat API Key is missing or invalid for this platform');
       return;
     }
 

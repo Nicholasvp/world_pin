@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../repositories/visited_countries_repository.dart';
+import 'premium_provider.dart';
+import 'config_provider.dart';
 
 class VisitedCountriesNotifier extends AsyncNotifier<List<String>> {
   late final VisitedCountriesRepository _repo;
@@ -11,6 +13,18 @@ class VisitedCountriesNotifier extends AsyncNotifier<List<String>> {
   }
 
   Future<void> add(String isoCode) async {
+    final isPremium = ref.read(premiumProvider);
+    if (!isPremium) {
+      final current = state.value ?? [];
+      if (!current.contains(isoCode)) {
+        final limit = await ref.read(configLimitProvider.future);
+        if (current.length >= limit) {
+          await ref.read(premiumProvider.notifier).purchaseFullAccess();
+          return;
+        }
+      }
+    }
+
     final updated = await _repo.addVisited(isoCode);
     state = AsyncData(updated);
   }
