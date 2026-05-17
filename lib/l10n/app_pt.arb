@@ -17,6 +17,7 @@
   "markCountry": "Marcar País",
   "searchCountry": "Para onde você foi?",
   "noCountriesFound": "Nenhum país encontrado.",
+  "clickToSelect": "Clique para selecionar",
   "selectDestination": "O que deseja marcar para {country}?",
   "alreadyVisited": "Já visitei",
   "wantToGo": "Desejo ir",
@@ -27,5 +28,10 @@
   "removed": "{country} removido",
   "error": "Erro: {message}",
   "emptyVisited": "Você ainda não marcou nenhum país visitado.",
-  "emptyWishlist": "Sua lista de desejos está vazia."
+  "emptyWishlist": "Sua lista de desejos está vazia.",
+  "logout": "Sair",
+  "logoutConfirmTitle": "Sair da Conta",
+  "logoutConfirmMessage": "Tem certeza que deseja sair da sua conta?",
+  "profile": "Perfil",
+  "visitedCountriesLabel": "Países visitados:"
 }

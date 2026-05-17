@@ -206,6 +206,12 @@ abstract class AppLocalizations {
   /// **'No countries found.'**
   String get noCountriesFound;
 
+  /// No description provided for @clickToSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to select'**
+  String get clickToSelect;
+
   /// No description provided for @selectDestination.
   ///
   /// In en, this message translates to:
@@ -271,6 +277,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your wishlist is empty.'**
   String get emptyWishlist;
+
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logout;
+
+  /// No description provided for @logoutConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log Out'**
+  String get logoutConfirmTitle;
+
+  /// No description provided for @logoutConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out?'**
+  String get logoutConfirmMessage;
+
+  /// No description provided for @profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile;
+
+  /// No description provided for @visitedCountriesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Visited countries:'**
+  String get visitedCountriesLabel;
 }
 
 class _AppLocalizationsDelegate

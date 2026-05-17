@@ -11,6 +11,12 @@ class CountriesListView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final visitedAsync = ref.watch(visitedCountriesProvider);
+    final wishlistAsync = ref.watch(wishlistCountriesProvider);
+
+    final visitedCount = visitedAsync.value?.length ?? 0;
+    final wishlistCount = wishlistAsync.value?.length ?? 0;
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -18,8 +24,14 @@ class CountriesListView extends ConsumerWidget {
           title: Text(l10n.myTrips),
           bottom: TabBar(
             tabs: [
-              Tab(icon: const Icon(Icons.check_circle), text: l10n.visited),
-              Tab(icon: const Icon(Icons.star), text: l10n.wishlist),
+              Tab(
+                icon: const Icon(Icons.check_circle),
+                text: '${l10n.visited} ($visitedCount)',
+              ),
+              Tab(
+                icon: const Icon(Icons.star),
+                text: '${l10n.wishlist} ($wishlistCount)',
+              ),
             ],
           ),
         ),

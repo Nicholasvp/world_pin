@@ -17,6 +17,7 @@
   "markCountry": "Mark Country",
   "searchCountry": "Where did you go?",
   "noCountriesFound": "No countries found.",
+  "clickToSelect": "Click to select",
   "selectDestination": "What do you want to mark for {country}?",
   "alreadyVisited": "Already visited",
   "wantToGo": "Want to go",
@@ -27,5 +28,10 @@
   "removed": "{country} removed",
   "error": "Error: {message}",
   "emptyVisited": "You haven't marked any visited countries yet.",
-  "emptyWishlist": "Your wishlist is empty."
+  "emptyWishlist": "Your wishlist is empty.",
+  "logout": "Logout",
+  "logoutConfirmTitle": "Log Out",
+  "logoutConfirmMessage": "Are you sure you want to log out?",
+  "profile": "Profile",
+  "visitedCountriesLabel": "Visited countries:"
 }

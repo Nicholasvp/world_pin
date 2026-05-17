@@ -6,6 +6,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:sealed_countries/sealed_countries.dart' hide LatLng;
 import 'package:world_pin/l10n/app_localizations.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show Supabase;
 import '../controllers/auth_controller.dart';
 import '../providers/visited_countries_provider.dart';
 import '../providers/wishlist_countries_provider.dart';
@@ -128,31 +129,31 @@ class _MapViewState extends ConsumerState<MapView>
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(
+            isPremium ? Icons.verified_user_rounded : Icons.star_rounded,
+            color: isPremium ? Colors.green : Colors.amber,
+          ),
+          tooltip: isPremium ? 'Premium Active' : 'Go Premium',
+          onPressed: () {
+            if (isPremium) {
+              PremiumService.showCustomerCenter();
+            } else {
+              ref.read(premiumProvider.notifier).purchaseFullAccess();
+            }
+          },
+        ),
         title: Text(l10n.appTitle.toUpperCase()),
         actions: [
-          IconButton(
-            icon: Icon(
-              isPremium ? Icons.verified_user_rounded : Icons.star_rounded,
-              color: isPremium ? Colors.green : Colors.amber,
-            ),
-            tooltip: isPremium ? 'Premium Active' : 'Go Premium',
-            onPressed: () {
-              if (isPremium) {
-                PremiumService.showCustomerCenter();
-              } else {
-                ref.read(premiumProvider.notifier).purchaseFullAccess();
-              }
-            },
-          ),
           IconButton(
             icon: const Icon(Icons.list_alt_rounded),
             tooltip: l10n.myTrips,
             onPressed: () => context.push('/list'),
           ),
           IconButton(
-            icon: const Icon(Icons.logout_rounded),
-            tooltip: 'Sair',
-            onPressed: () => ref.read(authProvider.notifier).signOut(),
+            icon: const Icon(Icons.account_circle_rounded),
+            tooltip: l10n.profile,
+            onPressed: _showProfileSheet,
           ),
           const SizedBox(width: 8),
         ],
@@ -170,26 +171,25 @@ class _MapViewState extends ConsumerState<MapView>
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.example.world_pin',
           ),
-          if (worldPolygonsAsync.hasValue) ...[
-            if (visitedAsync.hasValue)
-              PolygonLayer(
-                polygons: buildCountryPolygons(
-                  worldData: worldPolygonsAsync.value!,
-                  isoCodes: visitedAsync.value!,
-                  fillColor: const Color(0x556750A4),
-                  borderColor: const Color(0xFF6750A4),
-                ),
-              ),
-            if (wishlistAsync.hasValue)
-              PolygonLayer(
-                polygons: buildCountryPolygons(
-                  worldData: worldPolygonsAsync.value!,
-                  isoCodes: wishlistAsync.value!,
-                  fillColor: const Color(0x55D4AF37),
-                  borderColor: const Color(0xFFD4AF37),
-                ),
-              ),
-          ],
+          if (worldPolygonsAsync.hasValue)
+            PolygonLayer(
+              polygons: [
+                if (visitedAsync.hasValue)
+                  ...buildCountryPolygons(
+                    worldData: worldPolygonsAsync.value!,
+                    isoCodes: visitedAsync.value!,
+                    fillColor: const Color(0x556750A4),
+                    borderColor: const Color(0xFF6750A4),
+                  ),
+                if (wishlistAsync.hasValue)
+                  ...buildCountryPolygons(
+                    worldData: worldPolygonsAsync.value!,
+                    isoCodes: wishlistAsync.value!,
+                    fillColor: const Color(0x55D4AF37),
+                    borderColor: const Color(0xFFD4AF37),
+                  ),
+              ],
+            ),
           if (visitedAsync.hasValue && visitedAsync.value!.isNotEmpty)
             MarkerLayer(
               markers: visitedAsync.value!
@@ -247,9 +247,15 @@ class _MapViewState extends ConsumerState<MapView>
   }
 
   Future<void> _searchAndAddCountry() async {
+    final visitedCodes = ref.read(visitedCountriesProvider).value ?? [];
+    final wishlistCodes = ref.read(wishlistCountriesProvider).value ?? [];
+
     final country = await showSearch(
       context: context,
-      delegate: CountrySearchDelegate(),
+      delegate: CountrySearchDelegate(
+        visitedCountryCodes: visitedCodes,
+        wishlistCountryCodes: wishlistCodes,
+      ),
     );
 
     if (country == null || !mounted) return;
@@ -334,5 +340,182 @@ class _MapViewState extends ConsumerState<MapView>
       LatLng(country.latLng.latitude, country.latLng.longitude),
       zoom: _zoomForCountry(country),
     );
+  }
+
+  void _showProfileSheet() {
+    final l10n = AppLocalizations.of(context)!;
+    final authState = ref.read(authProvider);
+    String userEmail = '';
+    if (authState is AuthAuthenticated) {
+      userEmail = authState.user.email ?? '';
+    } else {
+      userEmail = Supabase.instance.client.auth.currentUser?.email ?? '';
+    }
+
+    final visitedAsync = ref.read(visitedCountriesProvider);
+    final visitedCount = visitedAsync.value?.length ?? 0;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.person_rounded,
+                  size: 40,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                userEmail,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Divider(),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.visitedCountriesLabel,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.color?.withOpacity(0.8),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF6750A4).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.check_circle,
+                          size: 16,
+                          color: Color(0xFF6750A4),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '$visitedCount',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF6750A4),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _confirmSignOut();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade50,
+                    foregroundColor: Colors.red,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  icon: const Icon(Icons.logout_rounded),
+                  label: Text(
+                    l10n.logout,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _confirmSignOut() async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Icons.logout_rounded, color: Colors.red),
+        title: Text(l10n.logoutConfirmTitle),
+        content: Text(l10n.logoutConfirmMessage, textAlign: TextAlign.center),
+        actions: [
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(l10n.logout),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: Text(
+                    l10n.cancel,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      ref.read(authProvider.notifier).signOut();
+    }
   }
 }

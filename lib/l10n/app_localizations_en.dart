@@ -63,6 +63,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noCountriesFound => 'No countries found.';
 
   @override
+  String get clickToSelect => 'Click to select';
+
+  @override
   String selectDestination(Object country) {
     return 'What do you want to mark for $country?';
   }
@@ -102,4 +105,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emptyWishlist => 'Your wishlist is empty.';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
+  String get logoutConfirmTitle => 'Log Out';
+
+  @override
+  String get logoutConfirmMessage => 'Are you sure you want to log out?';
+
+  @override
+  String get profile => 'Profile';
+
+  @override
+  String get visitedCountriesLabel => 'Visited countries:';
 }
