@@ -11,10 +11,18 @@ class PremiumService {
   static Future<void> initialize() async {
     await Purchases.setLogLevel(kDebugMode ? LogLevel.debug : LogLevel.error);
 
-    String? apiKey = dotenv.env['REVENUECAT_API_KEY'];
+    String? apiKey;
+    if (Platform.isIOS) {
+      apiKey = dotenv.env['REVENUECAT_IOS_API_KEY'];
+    } else if (Platform.isAndroid) {
+      apiKey = dotenv.env['REVENUECAT_ANDROID_API_KEY'];
+    }
+
+    // Fallback if platform-specific keys are not set but the generic one is
+    apiKey ??= dotenv.env['REVENUECAT_API_KEY'];
 
     if (apiKey == null || apiKey.isEmpty) {
-      debugPrint('RevenueCat API Key is missing');
+      debugPrint('RevenueCat API Key is missing for this platform');
       return;
     }
 
