@@ -165,23 +165,24 @@ class _LoginViewState extends ConsumerState<LoginView> {
   }
 
   void _showResetPasswordDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final emailController = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Redefinir senha'),
+        title: Text(l10n.resetPassword),
         content: TextField(
           controller: emailController,
           keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            labelText: 'E-mail',
+          decoration: InputDecoration(
+            labelText: l10n.email,
             border: OutlineInputBorder(),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
@@ -189,11 +190,11 @@ class _LoginViewState extends ConsumerState<LoginView> {
                   .read(authProvider.notifier)
                   .resetPassword(emailController.text.trim());
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('E-mail de redefinição enviado')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(l10n.resetPasswordSent)));
             },
-            child: const Text('Enviar'),
+            child: Text(l10n.send),
           ),
         ],
       ),

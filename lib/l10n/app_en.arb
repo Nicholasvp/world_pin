@@ -33,5 +33,8 @@
   "logoutConfirmTitle": "Log Out",
   "logoutConfirmMessage": "Are you sure you want to log out?",
   "profile": "Profile",
-  "visitedCountriesLabel": "Visited countries:"
+  "visitedCountriesLabel": "Visited countries:",
+  "resetPassword": "Reset Password",
+  "resetPasswordSent": "Password reset email sent.",
+  "send": "Send"
 }

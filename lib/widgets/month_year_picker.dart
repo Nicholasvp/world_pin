@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:world_pin/l10n/app_localizations.dart';
 
 class MonthYearPicker extends StatefulWidget {
   final DateTime initialDate;
@@ -58,10 +59,12 @@ class _MonthYearPickerState extends State<MonthYearPicker> {
       _months.add(DateFormat.MMMM(locale).format(DateTime(2024, i)));
     }
 
-    _monthController =
-        FixedExtentScrollController(initialItem: _selectedMonth - 1);
-    _yearController =
-        FixedExtentScrollController(initialItem: _years.indexOf(_selectedYear));
+    _monthController = FixedExtentScrollController(
+      initialItem: _selectedMonth - 1,
+    );
+    _yearController = FixedExtentScrollController(
+      initialItem: _years.indexOf(_selectedYear),
+    );
   }
 
   @override
@@ -73,6 +76,7 @@ class _MonthYearPickerState extends State<MonthYearPicker> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
       backgroundColor: Theme.of(context).colorScheme.surface,
       surfaceTintColor: Colors.transparent,
@@ -93,22 +97,25 @@ class _MonthYearPickerState extends State<MonthYearPicker> {
                 scrollController: _monthController,
                 itemExtent: 45,
                 selectionOverlay: CupertinoPickerDefaultSelectionOverlay(
-                  background:
-                      Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  background: Theme.of(
+                    context,
+                  ).colorScheme.primary.withOpacity(0.1),
                 ),
                 onSelectedItemChanged: (index) {
                   setState(() => _selectedMonth = index + 1);
                 },
                 children: _months
-                    .map((m) => Center(
-                          child: Text(
-                            m[0].toUpperCase() + m.substring(1),
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
+                    .map(
+                      (m) => Center(
+                        child: Text(
+                          m[0].toUpperCase() + m.substring(1),
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
-                        ))
+                        ),
+                      ),
+                    )
                     .toList(),
               ),
             ),
@@ -119,22 +126,25 @@ class _MonthYearPickerState extends State<MonthYearPicker> {
                 scrollController: _yearController,
                 itemExtent: 45,
                 selectionOverlay: CupertinoPickerDefaultSelectionOverlay(
-                  background:
-                      Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  background: Theme.of(
+                    context,
+                  ).colorScheme.primary.withOpacity(0.1),
                 ),
                 onSelectedItemChanged: (index) {
                   setState(() => _selectedYear = _years[index]);
                 },
                 children: _years
-                    .map((y) => Center(
-                          child: Text(
-                            y.toString(),
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
+                    .map(
+                      (y) => Center(
+                        child: Text(
+                          y.toString(),
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
-                        ))
+                        ),
+                      ),
+                    )
                     .toList(),
               ),
             ),
@@ -146,7 +156,7 @@ class _MonthYearPickerState extends State<MonthYearPicker> {
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text(
-            'Cancelar',
+            l10n.cancel,
             style: TextStyle(color: Theme.of(context).colorScheme.primary),
           ),
         ),

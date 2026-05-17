@@ -120,4 +120,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get visitedCountriesLabel => 'Visited countries:';
+
+  @override
+  String get resetPassword => 'Reset Password';
+
+  @override
+  String get resetPasswordSent => 'Password reset email sent.';
+
+  @override
+  String get send => 'Send';
 }

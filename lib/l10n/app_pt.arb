@@ -33,5 +33,8 @@
   "logoutConfirmTitle": "Sair da Conta",
   "logoutConfirmMessage": "Tem certeza que deseja sair da sua conta?",
   "profile": "Perfil",
-  "visitedCountriesLabel": "Países visitados:"
+  "visitedCountriesLabel": "Países visitados:",
+  "resetPassword": "Recuperar Senha",
+  "resetPasswordSent": "E-mail de recuperação de senha enviado.",
+  "send": "Enviar"
 }

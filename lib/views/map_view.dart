@@ -167,6 +167,9 @@ class _MapViewState extends ConsumerState<MapView>
           initialZoom: 2,
           minZoom: 1.5,
           maxZoom: 10,
+          interactionOptions: InteractionOptions(
+            flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+          ),
         ),
         children: [
           TileLayer(

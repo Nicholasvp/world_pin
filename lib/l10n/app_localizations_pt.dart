@@ -121,4 +121,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get visitedCountriesLabel => 'Países visitados:';
+
+  @override
+  String get resetPassword => 'Recuperar Senha';
+
+  @override
+  String get resetPasswordSent => 'E-mail de recuperação de senha enviado.';
+
+  @override
+  String get send => 'Enviar';
 }
