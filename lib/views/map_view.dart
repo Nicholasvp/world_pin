@@ -169,7 +169,7 @@ class _MapViewState extends ConsumerState<MapView>
         children: [
           TileLayer(
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            userAgentPackageName: 'com.example.world_pin',
+            userAgentPackageName: 'com.nicholasvp.worldpin',
           ),
           if (worldPolygonsAsync.hasValue)
             PolygonLayer(

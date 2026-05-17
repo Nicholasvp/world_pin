@@ -8,7 +8,7 @@
 PRODUCT_NAME = world_pin
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.worldPin
+PRODUCT_BUNDLE_IDENTIFIER = com.nicholasvp.worldpin
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 com.nicholasvp. All rights reserved.

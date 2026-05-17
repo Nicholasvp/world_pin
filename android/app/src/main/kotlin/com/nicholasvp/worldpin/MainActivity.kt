@@ -1,4 +1,4 @@
-package com.example.world_pin
+package com.nicholasvp.worldpin
 
 import io.flutter.embedding.android.FlutterActivity
 
