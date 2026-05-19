@@ -19,7 +19,9 @@ class VisitedCountriesNotifier extends AsyncNotifier<List<String>> {
       if (!current.contains(isoCode)) {
         final limit = await ref.read(configLimitProvider.future);
         if (current.length >= limit) {
-          await ref.read(premiumProvider.notifier).purchaseFullAccess();
+          await ref
+              .read(premiumProvider.notifier)
+              .purchaseFullAccess(offeringIdentifier: "50%");
           return;
         }
       }
@@ -37,5 +39,5 @@ class VisitedCountriesNotifier extends AsyncNotifier<List<String>> {
 
 final visitedCountriesProvider =
     AsyncNotifierProvider<VisitedCountriesNotifier, List<String>>(
-  VisitedCountriesNotifier.new,
-);
+      VisitedCountriesNotifier.new,
+    );

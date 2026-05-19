@@ -28,8 +28,8 @@ class PremiumNotifier extends StateNotifier<bool> {
     state = await PremiumService.isPremium();
   }
 
-  Future<void> purchaseFullAccess() async {
-    await PremiumService.showPaywall();
+  Future<void> purchaseFullAccess({String? offeringIdentifier}) async {
+    await PremiumService.showPaywall(offeringIdentifier: offeringIdentifier);
     await refreshStatus();
   }
 

@@ -45,10 +45,19 @@ class PremiumService {
   }
 
   /// Displays the RevenueCat Paywall
-  static Future<void> showPaywall() async {
+  static Future<void> showPaywall({String? offeringIdentifier}) async {
     try {
+      Offering? targetOffering;
+      
+      // If a specific offering identifier is provided, we fetch it
+      if (offeringIdentifier != null) {
+        final offerings = await Purchases.getOfferings();
+        targetOffering = offerings.all[offeringIdentifier];
+      }
+
       final paywallResult = await RevenueCatUI.presentPaywallIfNeeded(
         _entitlementId,
+        offering: targetOffering,
         displayCloseButton: true,
       );
       debugPrint('Paywall result: $paywallResult');

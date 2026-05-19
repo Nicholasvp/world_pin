@@ -1,0 +1,8 @@
+scripts:
+  - name: Create .env file
+    script: |
+      echo "$ENV_FILE" > $CM_BUILD_DIR/.env
+  
+  - name: Flutter build
+    script: |
+      flutter build ipa --release
