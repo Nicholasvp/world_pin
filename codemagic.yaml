@@ -1,14 +1,16 @@
 workflows:
-  ios-workflow:
-    name: iOS Workflow
+  ios-release:
+    name: iOS Release
     environment:
-      vars:
-        ENV_FILE: Encrypted(...)
+      groups:
+        - env_vars
     scripts:
-      - name: Create .env file
+      - name: Criar arquivo .env
         script: |
           echo "$ENV_FILE" > $CM_BUILD_DIR/.env
-      - name: Flutter build iOS
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Build iOS
         script: |
           flutter build ipa --release
     artifacts:
