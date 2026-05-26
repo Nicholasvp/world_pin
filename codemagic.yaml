@@ -1,10 +1,15 @@
-scripts:
-  - name: Create .env file
-    script: |
-      echo "$ENV_FILE" > $FCI_BUILD_DIR/.env
-      ls -la $FCI_BUILD_DIR/.env
-      cat $FCI_BUILD_DIR/.env
-
-  - name: Flutter build
-    script: |
-      flutter build ipa --release
+workflows:
+  ios-workflow:
+    name: iOS Workflow
+    environment:
+      vars:
+        ENV_FILE: Encrypted(...)
+    scripts:
+      - name: Create .env file
+        script: |
+          echo "$ENV_FILE" > $CM_BUILD_DIR/.env
+      - name: Flutter build iOS
+        script: |
+          flutter build ipa --release
+    artifacts:
+      - build/ios/ipa/*.ipa
