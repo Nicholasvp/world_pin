@@ -1,5 +1,7 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:sealed_countries/sealed_countries.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:world_pin/l10n/app_localizations.dart';
 
 class CountrySearchDelegate extends SearchDelegate<WorldCountry?> {
@@ -17,14 +19,40 @@ class CountrySearchDelegate extends SearchDelegate<WorldCountry?> {
   @override
   String get searchFieldLabel => 'Search...'; // This is hard to localize inside SearchDelegate without passing context to constructor
 
+  void _selectRandomCountry(BuildContext context) {
+    final available = _allCountries.where(
+      (c) =>
+          !visitedCountryCodes.contains(c.code) &&
+          !wishlistCountryCodes.contains(c.code),
+    ).toList();
+
+    if (available.isEmpty) {
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.allCountriesAdded)),
+      );
+      return;
+    }
+
+    final random = math.Random();
+    final country = available[random.nextInt(available.length)];
+    query = country.internationalName;
+  }
+
   @override
   List<Widget> buildActions(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return [
       if (query.isNotEmpty)
         IconButton(
           icon: const Icon(Icons.close_rounded),
           onPressed: () => query = '',
         ),
+      IconButton(
+        icon: const Icon(Icons.casino_rounded),
+        tooltip: l10n.selectRandomCountry,
+        onPressed: () => _selectRandomCountry(context),
+      ),
     ];
   }
 
@@ -58,35 +86,108 @@ class CountrySearchDelegate extends SearchDelegate<WorldCountry?> {
     }
 
     final l10n = AppLocalizations.of(context)!;
+    final showRandomHeader = q.isEmpty;
+    final itemCount = results.length + (showRandomHeader ? 1 : 0);
 
     return ListView.separated(
       padding: const EdgeInsets.all(16),
-      itemCount: results.length,
+      itemCount: itemCount,
       separatorBuilder: (context, index) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
-        final country = results[index];
+        if (showRandomHeader && index == 0) {
+          return Card(
+            elevation: 0,
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            child: ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.casino_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 24,
+                ),
+              ),
+              title: Text(
+                l10n.selectRandomCountry,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              subtitle: Text(
+                l10n.randomCountry,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                ),
+              ),
+              trailing: Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Theme.of(context).colorScheme.primary,
+                size: 16,
+              ),
+              onTap: () => _selectRandomCountry(context),
+            ),
+          );
+        }
+
+        final countryIndex = showRandomHeader ? index - 1 : index;
+        final country = results[countryIndex];
         final isVisited = visitedCountryCodes.contains(country.code);
         final isWishlisted = wishlistCountryCodes.contains(country.code);
         final isAlreadyAdded = isVisited || isWishlisted;
 
         String subtitleText;
-        Widget? trailingWidget;
+        Widget? statusWidget;
         if (isVisited) {
           subtitleText = l10n.alreadyVisited;
-          trailingWidget = const Icon(
+          statusWidget = const Icon(
             Icons.check_circle,
             color: Color(0xFF6750A4),
           );
         } else if (isWishlisted) {
           subtitleText = l10n.wantToGo;
-          trailingWidget = const Icon(
+          statusWidget = const Icon(
             Icons.star,
             color: Color(0xFFD4AF37),
           );
         } else {
           subtitleText = l10n.clickToSelect;
-          trailingWidget = null;
+          statusWidget = null;
         }
+
+        final trailingWidget = Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.info_outline, color: Colors.blueAccent),
+              tooltip: 'More info about ${country.internationalName}',
+              onPressed: () async {
+                final url = Uri.parse(
+                  'https://www.google.com/search?q=${Uri.encodeComponent(country.internationalName)}',
+                );
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                } else {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Could not launch search'),
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
+            if (statusWidget != null) ...[
+              const SizedBox(width: 8),
+              statusWidget,
+            ],
+          ],
+        );
 
         return Card(
           elevation: 0,

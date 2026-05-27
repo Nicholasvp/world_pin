@@ -130,4 +130,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get send => 'Enviar';
+
+  @override
+  String get randomCountry => 'País Aleatório';
+
+  @override
+  String get selectRandomCountry => 'Escolher um país aleatório';
+
+  @override
+  String get allCountriesAdded => 'Todos os países já foram adicionados!';
 }

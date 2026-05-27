@@ -18,10 +18,7 @@ class FakeVisitedCountriesNotifier extends VisitedCountriesNotifier {
 }
 
 class FakePremiumNotifier extends PremiumNotifier {
-  FakePremiumNotifier() : super();
-
-  @override
-  Future<void> _init() async {
+  FakePremiumNotifier() : super() {
     state = false;
   }
 }

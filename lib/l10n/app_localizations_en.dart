@@ -129,4 +129,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get send => 'Send';
+
+  @override
+  String get randomCountry => 'Random Country';
+
+  @override
+  String get selectRandomCountry => 'Select a random country';
+
+  @override
+  String get allCountriesAdded => 'All countries have already been added!';
 }

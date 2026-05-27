@@ -36,5 +36,8 @@
   "visitedCountriesLabel": "Países visitados:",
   "resetPassword": "Recuperar Senha",
   "resetPasswordSent": "E-mail de recuperação de senha enviado.",
-  "send": "Enviar"
+  "send": "Enviar",
+  "randomCountry": "País Aleatório",
+  "selectRandomCountry": "Escolher um país aleatório",
+  "allCountriesAdded": "Todos os países já foram adicionados!"
 }

@@ -36,5 +36,8 @@
   "visitedCountriesLabel": "Visited countries:",
   "resetPassword": "Reset Password",
   "resetPasswordSent": "Password reset email sent.",
-  "send": "Send"
+  "send": "Send",
+  "randomCountry": "Random Country",
+  "selectRandomCountry": "Select a random country",
+  "allCountriesAdded": "All countries have already been added!"
 }

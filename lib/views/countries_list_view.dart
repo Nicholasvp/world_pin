@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sealed_countries/sealed_countries.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:world_pin/l10n/app_localizations.dart';
 import '../providers/visited_countries_provider.dart';
 import '../providers/wishlist_countries_provider.dart';
@@ -111,9 +112,34 @@ class _CountryList extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text('Código: ${country.code}'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
-                  onPressed: () => _confirmDeletion(context, country),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.info_outline, color: Colors.blueAccent),
+                      tooltip: 'More info about ${country.internationalName}',
+                      onPressed: () async {
+                        final url = Uri.parse(
+                          'https://www.google.com/search?q=${Uri.encodeComponent(country.internationalName)}',
+                        );
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url, mode: LaunchMode.externalApplication);
+                        } else {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Could not launch search'),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.red),
+                      onPressed: () => _confirmDeletion(context, country),
+                    ),
+                  ],
                 ),
               ),
             );

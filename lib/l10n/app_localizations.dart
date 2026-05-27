@@ -325,6 +325,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send'**
   String get send;
+
+  /// No description provided for @randomCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Random Country'**
+  String get randomCountry;
+
+  /// No description provided for @selectRandomCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a random country'**
+  String get selectRandomCountry;
+
+  /// No description provided for @allCountriesAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'All countries have already been added!'**
+  String get allCountriesAdded;
 }
 
 class _AppLocalizationsDelegate
