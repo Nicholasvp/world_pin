@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:purchases_ui_flutter/paywall_result.dart';
+import '../repositories/auth_repository.dart';
 import '../services/premium_service.dart';
 
 class PremiumNotifier extends StateNotifier<bool> {
@@ -20,7 +23,8 @@ class PremiumNotifier extends StateNotifier<bool> {
 
   void _updateStatus(CustomerInfo customerInfo) {
     const entitlementId = 'Nicholas Pinheiro Pro';
-    final isPro = customerInfo.entitlements.all[entitlementId]?.isActive ?? false;
+    final isPro =
+        customerInfo.entitlements.all[entitlementId]?.isActive ?? false;
     state = isPro;
   }
 
@@ -29,13 +33,32 @@ class PremiumNotifier extends StateNotifier<bool> {
   }
 
   Future<void> purchaseFullAccess({String? offeringIdentifier}) async {
-    await PremiumService.showPaywall(offeringIdentifier: offeringIdentifier);
-    await refreshStatus();
+    final result = await PremiumService.showPaywall(
+      offeringIdentifier: offeringIdentifier,
+    );
+    // If the paywall result indicates a successful purchase, we can safely set premium = true
+    if (result == PaywallResult.purchased) {
+      state = true;
+    } else {
+      // Fallback to checking current status via PremiumService
+      await refreshStatus();
+    }
+    await _syncPremiumToSupabase(state);
   }
 
   Future<void> restore() async {
     final success = await PremiumService.restorePurchases();
     state = success;
+    await _syncPremiumToSupabase(success);
+  }
+
+  Future<void> _syncPremiumToSupabase(bool isPremium) async {
+    try {
+      final repo = AuthRepository();
+      await repo.updatePremiumStatus(isPremium: isPremium);
+    } catch (e) {
+      debugPrint('Erro ao sincronizar premium com Supabase: $e');
+    }
   }
 }
 

@@ -4,7 +4,7 @@ class AuthRepository {
   final SupabaseClient _client;
 
   AuthRepository({SupabaseClient? client})
-      : _client = client ?? Supabase.instance.client;
+    : _client = client ?? Supabase.instance.client;
 
   User? get currentUser => _client.auth.currentUser;
 
@@ -32,10 +32,7 @@ class AuthRepository {
     return response.user!;
   }
 
-  Future<User> signIn({
-    required String email,
-    required String password,
-  }) async {
+  Future<User> signIn({required String email, required String password}) async {
     final response = await _client.auth.signInWithPassword(
       email: email,
       password: password,
@@ -50,6 +47,16 @@ class AuthRepository {
 
   Future<void> resetPassword(String email) async {
     await _client.auth.resetPasswordForEmail(email);
+  }
+
+  Future<void> updatePremiumStatus({required bool isPremium}) async {
+    final user = _client.auth.currentUser;
+    if (user == null) throw Exception('Utilizador não autenticado');
+
+    await _client
+        .from('users')
+        .update({'premium': isPremium})
+        .eq('id', user.id);
   }
 
   Future<void> deleteAccount() async {

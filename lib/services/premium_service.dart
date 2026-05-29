@@ -17,7 +17,9 @@ class PremiumService {
 
     if (Platform.isIOS && iosKey != null && !iosKey.contains('your_actual')) {
       apiKey = iosKey;
-    } else if (Platform.isAndroid && androidKey != null && !androidKey.contains('your_actual')) {
+    } else if (Platform.isAndroid &&
+        androidKey != null &&
+        !androidKey.contains('your_actual')) {
       apiKey = androidKey;
     }
 
@@ -45,10 +47,10 @@ class PremiumService {
   }
 
   /// Displays the RevenueCat Paywall
-  static Future<void> showPaywall({String? offeringIdentifier}) async {
+  static Future<PaywallResult> showPaywall({String? offeringIdentifier}) async {
     try {
       Offering? targetOffering;
-      
+
       // If a specific offering identifier is provided, we fetch it
       if (offeringIdentifier != null) {
         final offerings = await Purchases.getOfferings();
@@ -61,8 +63,10 @@ class PremiumService {
         displayCloseButton: true,
       );
       debugPrint('Paywall result: $paywallResult');
+      return paywallResult;
     } catch (e) {
       debugPrint('Error showing paywall: $e');
+      throw Exception('Error showing paywall');
     }
   }
 
