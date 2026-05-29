@@ -95,6 +95,20 @@ class AuthController extends Notifier<AuthState> {
       state = AuthError(e.message);
     }
   }
+
+  Future<void> deleteAccount() async {
+    state = const AuthLoading();
+    try {
+      await _repository.deleteAccount();
+      await signOut();
+    } on AuthException catch (e) {
+      state = AuthError(e.message);
+      rethrow;
+    } catch (e) {
+      state = AuthError(e.toString());
+      rethrow;
+    }
+  }
 }
 
 final authProvider = NotifierProvider<AuthController, AuthState>(

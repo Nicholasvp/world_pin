@@ -343,6 +343,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All countries have already been added!'**
   String get allCountriesAdded;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccountConfirmTitle;
+
+  /// No description provided for @deleteAccountConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure? This action is irreversible.'**
+  String get deleteAccountConfirmMessage;
+
+  /// No description provided for @deleteAccountButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteAccountButton;
 }
 
 class _AppLocalizationsDelegate

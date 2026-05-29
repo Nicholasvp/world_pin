@@ -51,4 +51,15 @@ class AuthRepository {
   Future<void> resetPassword(String email) async {
     await _client.auth.resetPasswordForEmail(email);
   }
+
+  Future<void> deleteAccount() async {
+    final session = _client.auth.currentSession;
+    if (session == null) throw Exception('Utilizador não autenticado');
+
+    final accessToken = session.accessToken;
+    await _client.functions.invoke(
+      'delete-user',
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
+  }
 }

@@ -39,5 +39,9 @@
   "send": "Enviar",
   "randomCountry": "País Aleatório",
   "selectRandomCountry": "Escolher um país aleatório",
-  "allCountriesAdded": "Todos os países já foram adicionados!"
+  "allCountriesAdded": "Todos os países já foram adicionados!",
+  "deleteAccount": "Deletar conta",
+  "deleteAccountConfirmTitle": "Deletar conta",
+  "deleteAccountConfirmMessage": "Tem certeza? Esta ação é irreversível.",
+  "deleteAccountButton": "Deletar"
 }

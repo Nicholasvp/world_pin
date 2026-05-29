@@ -139,4 +139,17 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get allCountriesAdded => 'Todos os países já foram adicionados!';
+
+  @override
+  String get deleteAccount => 'Deletar conta';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Deletar conta';
+
+  @override
+  String get deleteAccountConfirmMessage =>
+      'Tem certeza? Esta ação é irreversível.';
+
+  @override
+  String get deleteAccountButton => 'Deletar';
 }
