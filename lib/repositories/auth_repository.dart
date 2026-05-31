@@ -49,6 +49,19 @@ class AuthRepository {
     await _client.auth.resetPasswordForEmail(email);
   }
 
+  Future<bool> getPremiumStatus() async {
+    final user = _client.auth.currentUser;
+    if (user == null) return false;
+
+    final response = await _client
+        .from('users')
+        .select('premium')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    return response?['premium'] == true;
+  }
+
   Future<void> updatePremiumStatus({required bool isPremium}) async {
     final user = _client.auth.currentUser;
     if (user == null) throw Exception('Utilizador não autenticado');

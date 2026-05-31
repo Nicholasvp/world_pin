@@ -13,7 +13,6 @@ class ConfigRepository {
       final response = await _client
           .from('config')
           .select('limit_free_countries')
-          .limit(1)
           .maybeSingle();
 
       if (response != null && response['limit_free_countries'] != null) {

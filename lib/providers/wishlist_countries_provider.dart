@@ -1,13 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../repositories/visited_countries_repository.dart';
+import '../controllers/auth_controller.dart';
 import 'premium_provider.dart';
 import 'config_provider.dart';
 
 class WishlistCountriesNotifier extends AsyncNotifier<List<String>> {
-  late final VisitedCountriesRepository _repo;
+  late VisitedCountriesRepository _repo;
 
   @override
   Future<List<String>> build() async {
+    // Observa o estado de autenticação — quando mudar (login/logout),
+    // o provider é invalidado e recarregado com os dados do novo utilizador.
+    final authState = ref.watch(authProvider);
+    if (authState is! AuthAuthenticated) return [];
+
     _repo = VisitedCountriesRepository();
     return _repo.getWishlist();
   }

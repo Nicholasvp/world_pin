@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:purchases_ui_flutter/paywall_result.dart';
+import '../controllers/auth_controller.dart';
 import '../repositories/auth_repository.dart';
 import '../services/premium_service.dart';
 
@@ -10,45 +11,44 @@ class PremiumNotifier extends StateNotifier<bool> {
     _init();
   }
 
-  Future<void> _init() async {
-    // Listen to customer info changes
-    Purchases.addCustomerInfoUpdateListener((customerInfo) {
-      _updateStatus(customerInfo);
-    });
+  late void Function(CustomerInfo) _customerInfoListener;
 
-    // Initial check
-    final status = await PremiumService.isPremium();
-    state = status;
+  Future<void> _init() async {
+    _customerInfoListener = (CustomerInfo customerInfo) {
+      if (mounted) _updateStatus();
+    };
+
+    Purchases.addCustomerInfoUpdateListener(_customerInfoListener);
+
+    await _updateStatus();
   }
 
-  void _updateStatus(CustomerInfo customerInfo) {
-    const entitlementId = 'Nicholas Pinheiro Pro';
-    final isPro =
-        customerInfo.entitlements.all[entitlementId]?.isActive ?? false;
-    state = isPro;
+  Future<void> _updateStatus() async {
+    final repo = AuthRepository();
+    final isPro = await repo.getPremiumStatus();
+    if (mounted) state = isPro;
   }
 
   Future<void> refreshStatus() async {
-    state = await PremiumService.isPremium();
+    final status = await PremiumService.isPremium();
+    if (mounted) state = status;
   }
 
   Future<void> purchaseFullAccess({String? offeringIdentifier}) async {
     final result = await PremiumService.showPaywall(
       offeringIdentifier: offeringIdentifier,
     );
-    // If the paywall result indicates a successful purchase, we can safely set premium = true
     if (result == PaywallResult.purchased) {
-      state = true;
+      if (mounted) state = true;
     } else {
-      // Fallback to checking current status via PremiumService
       await refreshStatus();
     }
-    await _syncPremiumToSupabase(state);
+    if (mounted) await _syncPremiumToSupabase(state);
   }
 
   Future<void> restore() async {
     final success = await PremiumService.restorePurchases();
-    state = success;
+    if (mounted) state = success;
     await _syncPremiumToSupabase(success);
   }
 
@@ -60,8 +60,15 @@ class PremiumNotifier extends StateNotifier<bool> {
       debugPrint('Erro ao sincronizar premium com Supabase: $e');
     }
   }
+
+  @override
+  void dispose() {
+    Purchases.removeCustomerInfoUpdateListener(_customerInfoListener);
+    super.dispose();
+  }
 }
 
 final premiumProvider = StateNotifierProvider<PremiumNotifier, bool>((ref) {
+  ref.watch(authProvider);
   return PremiumNotifier();
 });
