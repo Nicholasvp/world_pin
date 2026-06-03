@@ -88,24 +88,24 @@ void main() {
       expect(result, equals(3));
     });
 
-    test('Retorna fallback padrão (5) quando a resposta for nula ou inválida', () async {
+    test('Retorna fallback padrão (3) quando a resposta for nula ou inválida', () async {
       // Configura um mock client que retorna nulo
       final mockClient = FakeSupabaseClient(mockResponse: null);
       final repository = ConfigRepository(client: mockClient);
 
       final result = await repository.getLimitFreeCountries();
 
-      expect(result, equals(5));
+      expect(result, equals(3));
     });
 
-    test('Retorna fallback padrão (5) caso ocorra alguma exceção no Supabase', () async {
+    test('Retorna fallback padrão (3) caso ocorra alguma exceção no Supabase', () async {
       // Configura um mock client que lança uma exceção de banco de dados
       final mockClient = FakeSupabaseClient(throwError: true);
       final repository = ConfigRepository(client: mockClient);
 
       final result = await repository.getLimitFreeCountries();
 
-      expect(result, equals(5));
-    });
+      expect(result, equals(3));
+  });
   });
 }
