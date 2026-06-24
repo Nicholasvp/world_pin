@@ -12,9 +12,6 @@ import '../providers/visited_countries_provider.dart';
 import '../providers/wishlist_countries_provider.dart';
 import '../providers/world_polygons_provider.dart';
 import 'country_search_delegate.dart';
-import '../providers/premium_provider.dart';
-import '../providers/config_provider.dart';
-import '../services/premium_service.dart';
 import '../widgets/month_year_picker.dart';
 
 
@@ -127,24 +124,9 @@ class _MapViewState extends ConsumerState<MapView>
     final wishlistAsync = ref.watch(wishlistCountriesProvider);
     final worldPolygonsAsync = ref.watch(worldPolygonsProvider);
     final l10n = AppLocalizations.of(context)!;
-    final isPremium = ref.watch(premiumProvider);
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(
-            isPremium ? Icons.verified_user_rounded : Icons.star_rounded,
-            color: isPremium ? Colors.green : Colors.amber,
-          ),
-          tooltip: isPremium ? 'Premium Active' : 'Go Premium',
-          onPressed: () {
-            if (isPremium) {
-              PremiumService.showCustomerCenter();
-            } else {
-              ref.read(premiumProvider.notifier).purchaseFullAccess();
-            }
-          },
-        ),
         title: Text(l10n.appTitle.toUpperCase()),
         actions: [
           IconButton(
@@ -326,19 +308,7 @@ class _MapViewState extends ConsumerState<MapView>
 
     if (choice == null || !mounted) return;
 
-    final isPremium = ref.read(premiumProvider);
-
     if (choice == 'visited') {
-      if (!isPremium) {
-        final limit = await ref.read(configLimitProvider.future);
-        if (visitedCodes.length >= limit) {
-          if (mounted) {
-            await ref.read(premiumProvider.notifier).purchaseFullAccess();
-          }
-          return;
-        }
-      }
-
       final date = await MonthYearPicker.show(
         context: context,
         initialDate: DateTime.now(),
@@ -350,16 +320,6 @@ class _MapViewState extends ConsumerState<MapView>
 
       await ref.read(visitedCountriesProvider.notifier).add(country.code);
     } else {
-      if (!isPremium) {
-        final limit = await ref.read(configLimitProvider.future);
-        if (wishlistCodes.length >= limit) {
-          if (mounted) {
-            await ref.read(premiumProvider.notifier).purchaseFullAccess();
-          }
-          return;
-        }
-      }
-
       await ref.read(wishlistCountriesProvider.notifier).add(country.code);
     }
 
