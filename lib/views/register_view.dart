@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:world_pin/l10n/app_localizations.dart';
+import 'package:world_pin/widgets/language_switcher.dart';
 import '../controllers/auth_controller.dart';
 
 class RegisterView extends ConsumerStatefulWidget {
@@ -64,6 +65,12 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
         leading: BackButton(onPressed: () => context.pop()),
         title: const Text('Criar conta'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 8),
+            child: LanguageSwitcher(compact: true),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Center(

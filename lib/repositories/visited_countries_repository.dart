@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:sealed_countries/sealed_countries.dart';
+import 'package:world_pin/helpers/country_helper.dart';
 
 class VisitedCountriesRepository {
   final SupabaseClient _client;
@@ -73,7 +73,7 @@ class VisitedCountriesRepository {
 
     final current = await _get(column);
     final updated = current.where((c) {
-      final country = WorldCountry.maybeFromAnyCode(c);
+      final country = CountryHelper.resolveCountry(c);
       return country?.code != isoCode && c != isoCode;
     }).toList();
 

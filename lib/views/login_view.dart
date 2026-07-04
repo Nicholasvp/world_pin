@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:world_pin/l10n/app_localizations.dart';
+import 'package:world_pin/widgets/language_switcher.dart';
 import '../controllers/auth_controller.dart';
 
 class LoginView extends ConsumerStatefulWidget {
@@ -58,6 +59,11 @@ class _LoginViewState extends ConsumerState<LoginView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const Align(
+                    alignment: Alignment.topRight,
+                    child: LanguageSwitcher(),
+                  ),
+                  const SizedBox(height: 16),
                   Image.asset('assets/logo.png', height: 120),
                   const SizedBox(height: 32),
                   Text(

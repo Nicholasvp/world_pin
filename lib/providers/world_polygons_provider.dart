@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:sealed_countries/sealed_countries.dart' show WorldCountry;
+import 'package:world_pin/helpers/country_helper.dart';
 
 // Raw polygon shapes (points + holes) keyed by ISO Alpha-3 code.
 // Colors are applied later so the same data can be reused with different styles.
@@ -79,8 +79,8 @@ List<Polygon> buildCountryPolygons({
 }) {
   final polygons = <Polygon>[];
   for (final code in isoCodes) {
-    // Convert to Alpha-3 if it's an old Alpha-2 code
-    final alpha3Code = WorldCountry.maybeFromAnyCode(code)?.code ?? code;
+    final country = CountryHelper.resolveCountry(code);
+    final alpha3Code = country?.code ?? code;
     final shapes = worldData[alpha3Code];
     if (shapes == null) continue;
     for (final shape in shapes) {

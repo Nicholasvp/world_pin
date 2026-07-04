@@ -152,4 +152,22 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get deleteAccountButton => 'Deletar';
+
+  @override
+  String get changePhoto => 'Alterar Foto';
+
+  @override
+  String get showAllTravelers => 'Ver todos viajantes';
+
+  @override
+  String get hideOthers => 'Ocultar outros';
+
+  @override
+  String get english => 'Inglês';
+
+  @override
+  String get portuguese => 'Português';
+
+  @override
+  String get language => 'Idioma';
 }

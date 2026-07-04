@@ -151,4 +151,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountButton => 'Delete';
+
+  @override
+  String get changePhoto => 'Change Photo';
+
+  @override
+  String get showAllTravelers => 'Show all travelers';
+
+  @override
+  String get hideOthers => 'Hide others';
+
+  @override
+  String get english => 'English';
+
+  @override
+  String get portuguese => 'Portuguese';
+
+  @override
+  String get language => 'Language';
 }

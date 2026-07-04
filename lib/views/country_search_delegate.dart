@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:sealed_countries/sealed_countries.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:world_pin/helpers/country_helper.dart';
 import 'package:world_pin/l10n/app_localizations.dart';
 
 class CountrySearchDelegate extends SearchDelegate<WorldCountry?> {
@@ -13,11 +14,10 @@ class CountrySearchDelegate extends SearchDelegate<WorldCountry?> {
     required this.wishlistCountryCodes,
   });
 
-  static final _allCountries = WorldCountry.list.toList()
-    ..sort((a, b) => a.name.common.compareTo(b.name.common));
+  static final _allCountries = CountryHelper.allCountries;
 
   @override
-  String get searchFieldLabel => 'Search...'; // This is hard to localize inside SearchDelegate without passing context to constructor
+  String get searchFieldLabel => 'Search...';
 
   void _selectRandomCountry(BuildContext context) {
     final available = _allCountries.where(
@@ -36,7 +36,8 @@ class CountrySearchDelegate extends SearchDelegate<WorldCountry?> {
 
     final random = math.Random();
     final country = available[random.nextInt(available.length)];
-    query = country.internationalName;
+    final locale = Localizations.localeOf(context);
+    query = countryName(country, locale);
   }
 
   @override
@@ -70,15 +71,18 @@ class CountrySearchDelegate extends SearchDelegate<WorldCountry?> {
 
   Widget _buildList(BuildContext context) {
     final q = query.toLowerCase();
+    final locale = Localizations.localeOf(context);
+
     final results = q.isEmpty
         ? _allCountries
-        : _allCountries
-              .where(
-                (c) =>
-                    c.name.common.toLowerCase().contains(q) ||
-                    c.internationalName.toLowerCase().contains(q),
-              )
-              .toList();
+        : _allCountries.where((c) {
+            final name = countryName(c, locale).toLowerCase();
+            final intlName = c.internationalName.toLowerCase();
+            final commonName = c.name.common.toLowerCase();
+            return name.contains(q) ||
+                intlName.contains(q) ||
+                commonName.contains(q);
+          }).toList();
 
     if (results.isEmpty) {
       final l10n = AppLocalizations.of(context)!;
@@ -139,6 +143,7 @@ class CountrySearchDelegate extends SearchDelegate<WorldCountry?> {
         final isVisited = visitedCountryCodes.contains(country.code);
         final isWishlisted = wishlistCountryCodes.contains(country.code);
         final isAlreadyAdded = isVisited || isWishlisted;
+        final displayName = countryName(country, locale);
 
         String subtitleText;
         Widget? statusWidget;
@@ -164,7 +169,7 @@ class CountrySearchDelegate extends SearchDelegate<WorldCountry?> {
           children: [
             IconButton(
               icon: const Icon(Icons.info_outline, color: Colors.blueAccent),
-              tooltip: 'More info about ${country.internationalName}',
+              tooltip: 'More info about $displayName',
               onPressed: () async {
                 final url = Uri.parse(
                   'https://www.google.com/search?q=${Uri.encodeComponent(country.internationalName)}',
@@ -201,7 +206,7 @@ class CountrySearchDelegate extends SearchDelegate<WorldCountry?> {
               child: Text(country.emoji, style: const TextStyle(fontSize: 32)),
             ),
             title: Text(
-              country.internationalName,
+              displayName,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: isAlreadyAdded ? Colors.grey : null,

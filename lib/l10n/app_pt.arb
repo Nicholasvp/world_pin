@@ -43,5 +43,11 @@
   "deleteAccount": "Deletar conta",
   "deleteAccountConfirmTitle": "Deletar conta",
   "deleteAccountConfirmMessage": "Tem certeza? Esta ação é irreversível.",
-  "deleteAccountButton": "Deletar"
+  "deleteAccountButton": "Deletar",
+  "changePhoto": "Alterar Foto",
+  "showAllTravelers": "Ver todos viajantes",
+  "hideOthers": "Ocultar outros",
+  "english": "Inglês",
+  "portuguese": "Português",
+  "language": "Idioma"
 }

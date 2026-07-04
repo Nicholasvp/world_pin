@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sealed_countries/sealed_countries.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:world_pin/helpers/country_helper.dart';
 import 'package:world_pin/l10n/app_localizations.dart';
 import '../providers/visited_countries_provider.dart';
 import '../providers/wishlist_countries_provider.dart';
@@ -95,9 +96,11 @@ class _CountryList extends StatelessWidget {
           separatorBuilder: (context, index) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final isoCode = isoCodes[index];
-            final country = WorldCountry.maybeFromAnyCode(isoCode);
+            final country = CountryHelper.resolveCountry(isoCode);
 
             if (country == null) return const SizedBox.shrink();
+
+            final displayName = countryName(country, Localizations.localeOf(context));
 
             return Card(
               elevation: 0,
@@ -108,7 +111,7 @@ class _CountryList extends StatelessWidget {
                   style: const TextStyle(fontSize: 28),
                 ),
                 title: Text(
-                  country.internationalName,
+                  displayName,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text('Código: ${country.code}'),
@@ -117,7 +120,7 @@ class _CountryList extends StatelessWidget {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.info_outline, color: Colors.blueAccent),
-                      tooltip: 'More info about ${country.internationalName}',
+                      tooltip: 'More info about $displayName',
                       onPressed: () async {
                         final url = Uri.parse(
                           'https://www.google.com/search?q=${Uri.encodeComponent(country.internationalName)}',
@@ -156,11 +159,12 @@ class _CountryList extends StatelessWidget {
     WorldCountry country,
   ) async {
     final l10n = AppLocalizations.of(context)!;
+    final displayName = countryName(country, Localizations.localeOf(context));
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.removeCountry),
-        content: Text(l10n.confirmRemove(country.internationalName)),
+        content: Text(l10n.confirmRemove(displayName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -179,7 +183,7 @@ class _CountryList extends StatelessWidget {
       await onRemove(country.code);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.removed(country.internationalName))),
+          SnackBar(content: Text(l10n.removed(displayName))),
         );
       }
     }
