@@ -19,7 +19,6 @@ import '../providers/avatar_provider.dart';
 import '../providers/all_users_provider.dart';
 import '../providers/locale_provider.dart';
 import 'country_search_delegate.dart';
-import '../widgets/month_year_picker.dart';
 
 
 class MapView extends ConsumerStatefulWidget {
@@ -514,15 +513,6 @@ class _MapViewState extends ConsumerState<MapView>
     if (choice == null || !mounted) return;
 
     if (choice == 'visited') {
-      final date = await MonthYearPicker.show(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(1900),
-        lastDate: DateTime.now(),
-      );
-
-      if (date == null) return;
-
       await ref.read(visitedCountriesProvider.notifier).add(country.code);
     } else {
       await ref.read(wishlistCountriesProvider.notifier).add(country.code);
